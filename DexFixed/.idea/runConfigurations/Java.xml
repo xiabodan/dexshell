@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Java" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="Main" />
+    <module name="DexFixed" />
+    <option name="PROGRAM_PARAMETERS" value="C:\Users\nisosaikou\Desktop\壳\src.apk C:\Users\nisosaikou\Desktop\壳\classes.dex" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
