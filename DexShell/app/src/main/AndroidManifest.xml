@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:name=".ProxyApplication"
-        android:theme="@style/Theme.DexShell">
+        android:theme="@style/Theme.AppCompat">
         <meta-data
             android:name="APPLICATION_CLASS_NAME"
             android:value="org.nisosaikou.helloworld.XApplication"/>
