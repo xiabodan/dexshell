@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.i("xiabo", "MainActivity onClicked");
+                    Log.i("xiabo", "MainActivity button onClicked");
                 }
             });
         }
@@ -39,6 +39,18 @@ public class MainActivity extends Activity {
             WeakReference weakReference = (WeakReference) mPackages.get(key);
             Log.i("xiabo", key + ", " + weakReference.get());
         }
+
+        Button button2 = findViewById(R.id.button2);
+        Log.i("xiabo", "MainActivity onCreate button2 " + button2);
+        if (button2 != null) {
+            button2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i("xiabo", "MainActivity button2 onClicked");
+                }
+            });
+        }
+
     }
 
     private void onClick(View view) {

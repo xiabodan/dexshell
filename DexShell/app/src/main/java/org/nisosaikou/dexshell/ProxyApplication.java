@@ -20,6 +20,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -85,6 +87,7 @@ public class ProxyApplication extends Application {
         //但是为了替换掉父节点我们需要通过反射来获取并修改其值
         //将父节点DexClassLoader替换
         RefInvoke.setFieldOjbect("android.app.LoadedApk", "mClassLoader", weakReference.get(), newDexClassLoader);
+        repalceLoadedApkResDir(weakReference.get(), mSrcApkAbsolutePath);
     }
 
     @Override
@@ -145,6 +148,64 @@ public class ProxyApplication extends Application {
         }
 
         app.onCreate();
+        // try {
+        //     mergePluginResources(this, getPackageName(), mSrcApkAbsolutePath);
+        // } catch (IllegalAccessException e) {
+        //     e.printStackTrace();
+        // } catch (InstantiationException e) {
+        //     e.printStackTrace();
+        // } catch (NoSuchMethodException e) {
+        //     e.printStackTrace();
+        // } catch (InvocationTargetException e) {
+        //     e.printStackTrace();
+        // } catch (NoSuchFieldException e) {
+        //     e.printStackTrace();
+        // }
+    }
+
+    private static void repalceLoadedApkResDir(Object loadedApk, String dexPath) {
+        RefInvoke.setFieldOjbect("android.app.LoadedApk", "mResDir", loadedApk, dexPath);
+    }
+
+    private static void mergePluginResources(Application application, String apkName, String dexPath)
+            throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException, NoSuchFieldException {
+        // 创建一个新的 AssetManager 对象
+        AssetManager newAssetManagerObj = AssetManager.class.newInstance();
+        Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
+        // 塞入原来宿主的资源
+        addAssetPath.invoke(newAssetManagerObj, application.getBaseContext().getPackageResourcePath());
+        // 塞入插件的资源
+        File optDexFile = application.getBaseContext().getFileStreamPath(apkName);
+        addAssetPath.invoke(newAssetManagerObj, dexPath);
+
+        Log.i("xiabo", "mergePluginResources " + apkName + ", " + application.getBaseContext().getPackageResourcePath() + ", " + dexPath);
+
+        // 创建一个新的 Resources 对象
+        Resources newResourcesObj = new Resources(newAssetManagerObj,
+                application.getBaseContext().getResources().getDisplayMetrics(),
+                application.getBaseContext().getResources().getConfiguration());
+
+        // 获取 ContextImpl 中的 Resources 类型的 mResources 变量，并替换它的值为新的 Resources 对象
+        Field resourcesField = application.getBaseContext().getClass().getDeclaredField("mResources");
+        resourcesField.setAccessible(true);
+        resourcesField.set(application.getBaseContext(), newResourcesObj);
+
+        // 获取 ContextImpl 中的 LoadedApk 类型的 mPackageInfo 变量
+        Field packageInfoField = application.getBaseContext().getClass().getDeclaredField("mPackageInfo");
+        packageInfoField.setAccessible(true);
+        Object packageInfoObj = packageInfoField.get(application.getBaseContext());
+
+        // 获取 mPackageInfo 变量对象中类的 Resources 类型的 mResources 变量，，并替换它的值为新的 Resources 对象
+        // 注意：这是最主要的需要替换的，如果不需要支持插件运行时更新，只留这一个就可以了
+        Field resourcesField2 = packageInfoObj.getClass().getDeclaredField("mResources");
+        resourcesField2.setAccessible(true);
+        resourcesField2.set(packageInfoObj, newResourcesObj);
+
+        // 获取 ContextImpl 中的 Resources.Theme 类型的 mTheme 变量，并至空它
+        // 注意：清理mTheme对象，否则通过inflate方式加载资源会报错, 如果是activity动态加载插件，则需要把activity的mTheme对象也设置为null
+        Field themeField = application.getBaseContext().getClass().getDeclaredField("mTheme");
+        themeField.setAccessible(true);
+        themeField.set(application.getBaseContext(), null);
     }
 
     private byte[] getDexFileFromShellApk() throws IOException {
