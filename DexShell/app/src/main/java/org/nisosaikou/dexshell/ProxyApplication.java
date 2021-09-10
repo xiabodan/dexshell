@@ -31,7 +31,7 @@ import java.util.zip.ZipInputStream;
 import dalvik.system.DexClassLoader;
 
 public class ProxyApplication extends Application {
-    final String TAG = "过膝袜棒棒";
+    final String TAG = "ProxyApplication_Shell";
     // 源APK中启动类
     final String SRC_APP_MAIN_ACTIVITY = "APPLICATION_CLASS_NAME";
     // 源apk dex的绝对路径
@@ -44,6 +44,7 @@ public class ProxyApplication extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+        Log.i(TAG, "attachBaseContext app");
 
         // 获取存储路径
         File odex = this.getDir("payload_odex", MODE_PRIVATE);
@@ -82,18 +83,20 @@ public class ProxyApplication extends Application {
         //创建一个新的DexClassLoader用于加载源Apk，
         // 传入apk路径，dex释放路径，so路径，及父节点的DexClassLoader使其遵循双亲委托模型
         DexClassLoader newDexClassLoader = new DexClassLoader(mSrcApkAbsolutePath, mDexAbsolutePath, mLibAbsolutePath, (ClassLoader) RefInvoke.getFieldOjbect("android.app.LoadedApk", weakReference.get(), "mClassLoader"));
+        Log.i(TAG, "attachBaseContext weakReference " + weakReference.get());
 
         //getClassLoader()等同于 (ClassLoader) RefInvoke.getFieldOjbect()
         //但是为了替换掉父节点我们需要通过反射来获取并修改其值
         //将父节点DexClassLoader替换
         RefInvoke.setFieldOjbect("android.app.LoadedApk", "mClassLoader", weakReference.get(), newDexClassLoader);
-        repalceLoadedApkResDir(weakReference.get(), mSrcApkAbsolutePath);
+        // repalceLoadedApkResDir(weakReference.get(), mSrcApkAbsolutePath);
+        Log.i(TAG, "attachBaseContext newDexClassLoader " + newDexClassLoader);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-
+        Log.i(TAG, "onCreate app");
         // 源apk启动类
         String srcAppClassName = "";
         // 原apk所在路径
@@ -103,6 +106,7 @@ public class ProxyApplication extends Application {
             Bundle bundle = applicationInfo.metaData;
             if (bundle != null && bundle.containsKey(SRC_APP_MAIN_ACTIVITY)) {
                 srcAppClassName = bundle.getString(SRC_APP_MAIN_ACTIVITY);//className 是配置在xml文件中的。
+                Log.i(TAG, "在壳的Mainifest.xml中找到 " + SRC_APP_MAIN_ACTIVITY + " 字段信息 " + srcAppClassName);
             }
             else {
                 Log.i(TAG, "在壳的Mainifest.xml中找不到"+SRC_APP_MAIN_ACTIVITY+"字段信息。");
@@ -132,6 +136,8 @@ public class ProxyApplication extends Application {
         ApplicationInfo appinfo_In_AppBindData = (ApplicationInfo) RefInvoke.getFieldOjbect("android.app.ActivityThread$AppBindData", mBoundApplication, "appInfo");
         appinfo_In_LoadedApk.className = srcAppClassName;
         appinfo_In_AppBindData.className = srcAppClassName;
+
+        Log.i(TAG, "onCreate getClassLoader " + getClassLoader());
         // 2.注册application
         Application app = (Application) RefInvoke.invokeMethod("android.app.LoadedApk", "makeApplication", loadedApkInfo, new Class[] { boolean.class, Instrumentation.class }, new Object[] { false, null });
 
@@ -146,7 +152,7 @@ public class ProxyApplication extends Application {
             Object localProvider = RefInvoke.getFieldOjbect("android.app.ActivityThread$ProviderClientRecord", providerClientRecord, "mLocalProvider");
             RefInvoke.setFieldOjbect("android.content.ContentProvider", "mContext", localProvider, app);
         }
-
+        Log.i(TAG, "onCreate app " + app);
         app.onCreate();
         // try {
         //     mergePluginResources(this, getPackageName(), mSrcApkAbsolutePath);

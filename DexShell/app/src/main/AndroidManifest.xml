@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.nisosaikou.dexshell">
+    package="com.ludashi.dualspaceprox">
 
     <application
         android:allowBackup="true"
@@ -8,11 +8,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:name=".ProxyApplication"
-        android:theme="@style/Theme.AppCompat">
+        android:name="org.nisosaikou.dexshell.ProxyApplication">
         <meta-data
             android:name="APPLICATION_CLASS_NAME"
-            android:value="org.nisosaikou.helloworld.XApplication"/>
+            android:value="com.ludashi.dualspaceprox.application.SuperBoostApplication"/>
 
 <!--        <activity android:name=".MainActivity">
             <intent-filter>
@@ -21,13 +20,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>-->
-        <activity android:name="org.nisosaikou.helloworld.MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+<!--        <activity android:name="org.nisosaikou.helloworld.MainActivity">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
+
+<!--        <provider-->
+<!--            android:name="org.nisosaikou.helloworld.MyContentProvider"-->
+<!--            android:authorities="my.contentprovider.xiabo"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="true"></provider>-->
     </application>
 
 </manifest>
